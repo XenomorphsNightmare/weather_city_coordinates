@@ -1,13 +1,14 @@
 import './App.css';
 import React, {useState} from "react";
 import FetchCoordinates from "./Fetch_functions";
-import {SoilMoistureTable,SoilTempTable} from "./d3_func";
+import {AirGraph, SoilMoistureTable,SoilTempTable} from "./d3_func";
 
 
 function App() {
   const [cityName, setName] = useState(null);
   const [sendStatus, setSend] = useState(false);
   const [cityResults, setResults] = useState(null);
+  const [activeTab, setActiveTab] = useState("");
 
 
   function getName(val) {
@@ -24,6 +25,10 @@ function App() {
     }
     setSend(true);
   }
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+  };
 
   function CityTable({ cityName, latitude, longitude }) {
     return (
@@ -56,13 +61,41 @@ function App() {
           <input type='text' onChange={getName} />
           <button onClick={() => buttonClickHandler(cityName)}> Set city </button>
         </p>
+        <button
+            className={activeTab === '0' ? 'active' : ''}
+            onClick={() => handleTabChange('0')}
+          >
+            Soil Moisture
+          </button>
+          <button
+            className={activeTab === '1' ? 'active' : ''}
+            onClick={() => handleTabChange('1')}
+          >
+            Soil Temperature
+          </button>
+          <button
+            className={activeTab === '2' ? 'active' : ''}
+            onClick={() => handleTabChange('2')}
+          >
+            Air Temperature
+          </button>
         <h1>Weather Results </h1>
-        {cityResults &&
-        <SoilMoistureTable jsonData={cityResults.weatherData} />
-        }
-        {cityResults &&
-        <SoilTempTable jsonData={cityResults.weatherData} />}
-
+ 
+        {activeTab === '0' && (
+          <div>
+            {cityResults &&  <SoilMoistureTable jsonData={cityResults.weatherData} />}
+          </div>
+        )}
+        {activeTab === '1' && (
+          <div>
+            {cityResults && <SoilTempTable jsonData={cityResults.weatherData} />}
+          </div>
+        )}
+         {activeTab === '2' && (
+          <div>
+            {cityResults && <AirGraph jsonData={cityResults.weatherData} />}
+          </div>
+        )}
       </header>
     </div>
   );

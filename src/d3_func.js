@@ -214,5 +214,129 @@ const SoilTempTable = ({ jsonData }) => {
   );
 };
 
+const AirGraph = ({ jsonData }) => {
+  const svgRef = useRef();
+  const legendRef = useRef();
 
-export   {SoilMoistureTable, SoilTempTable};
+  useEffect(() => {
+    const margin = { top: 20, right: 80, bottom: 30, left: 50 };
+    const width = 800 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    const svg = d3.select(svgRef.current)
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const legend = d3.select(legendRef.current);
+
+    const parseTime = d3.timeParse("%Y-%m-%dT%H:%M");
+
+    // Parse dates and temperatures
+    const data = jsonData.hourly.time.map((timeStr, i) => ({
+      time: parseTime(timeStr),
+      temperature: jsonData.hourly.temperature_2m[i],
+      humidity: jsonData.hourly.relative_humidity_2m[i]
+    }));
+
+    // Define scales
+    const xScale = d3.scaleTime()
+      .domain(d3.extent(data, d => d.time))
+      .range([0, width]);
+
+    const yTemperatureScale = d3.scaleLinear()
+      .domain([d3.min(data, d => d.temperature), d3.max(data, d => d.temperature)])
+      .range([height, 0]);
+
+    const yHumidityScale = d3.scaleLinear()
+      .domain([d3.min(data, d => d.humidity), d3.max(data, d => d.humidity)])
+      .range([height, 0]);
+
+    // Add temperature line
+    const temperatureLine = d3.line()
+      .x(d => xScale(d.time))
+      .y(d => yTemperatureScale(d.temperature));
+
+    svg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", temperatureLine)
+      .style("stroke", "steelblue");
+
+    // Add humidity line
+    const humidityLine = d3.line()
+      .x(d => xScale(d.time))
+      .y(d => yHumidityScale(d.humidity));
+
+    svg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", humidityLine)
+      .style("stroke", "green");
+
+    // Add x axis
+    svg.append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale));
+
+    // Add y axes
+    svg.append("g")
+      .call(d3.axisLeft(yTemperatureScale))
+      .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Temperature (°C)");
+
+    svg.append("g")
+      .attr("transform", `translate(${width}, 0)`)
+      .call(d3.axisRight(yHumidityScale))
+      .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Humidity (%)");
+
+    // Add legend
+    legend.append("circle")
+      .attr("cx", 10)
+      .attr("cy", 10)
+      .attr("r", 5)
+      .style("fill", "steelblue");
+
+    legend.append("text")
+      .attr("x", 20)
+      .attr("y", 10)
+      .attr("dy", ".35em")
+      .text("Temperature");
+
+    legend.append("circle")
+      .attr("cx", 10)
+      .attr("cy", 30)
+      .attr("r", 5)
+      .style("fill", "green");
+
+    legend.append("text")
+      .attr("x", 20)
+      .attr("y", 30)
+      .attr("dy", ".35em")
+      .text("Humidity");
+
+  }, [jsonData]);
+
+  return (
+    <div>
+      <svg ref={svgRef}></svg>
+      <svg ref={legendRef} width={100} height={60}></svg>
+    </div>
+  );
+};
+
+
+
+export   {SoilMoistureTable, SoilTempTable, AirGraph};
