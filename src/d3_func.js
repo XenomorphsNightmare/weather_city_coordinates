@@ -18,7 +18,7 @@ const SoilMoistureTable = ({ jsonData }) => {
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    const legend = d3.select(legendRef.current);
+    //const legend = d3.select(legendRef.current);
 
     const timeParse = d3.timeParse('%Y-%m-%dT%H:%M');
     const timeFormat = d3.timeFormat('%H:%M');
