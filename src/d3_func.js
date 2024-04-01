@@ -112,8 +112,8 @@ const SoilMoistureTable = ({ jsonData }) => {
     .attr('x', legendSize + legendSpacing)
     .attr('y', (d, i) => i * (legendSize + legendSpacing) + legendSize / 2)
     .attr('dy', '0.35em')
-    .text(d => d.toFixed(2)); // Format the legend text as needed
-  }, [jsonData]);
+    .text(d => d.toFixed(2)); 
+  }, [jsonData, colorScale]);
 
   return (
     <div>
